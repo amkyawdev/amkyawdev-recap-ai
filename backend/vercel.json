@@ -18,5 +18,8 @@
   ],
   "env": {
     "OPENROUTER_API_KEY": "@openrouter_api_key"
-  }
+  },
+  "buildCommand": "pip install -r requirements",
+  "outputDirectory": "api",
+  "installCommand": "pip install -r requirements"
 }
