@@ -48,12 +48,7 @@ jobs:
             zlib1g-dev \
             unzip \
             zip \
-            libncurses6 \
-            libncursesw6-dev \
-            libffi-dev \
-            libopenblas-dev \
-            liblapack-dev \
-            libatlas-base-dev
+            libffi-dev
 
       - name: Install buildozer
         run: |
