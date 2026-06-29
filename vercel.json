@@ -1,38 +1,5 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/index.py",
-      "use": "@vercel/python",
-      "config": {
-        "excludeFiles": "backend/**"
-      }
-    },
-    {
-      "src": "web_frontend/dist/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/openrouter/(.*)",
-      "dest": "/api/index.py"
-    },
-    {
-      "src": "/api/openrouter",
-      "dest": "/api/index.py"
-    },
-    {
-      "src": "/assets/(.*)",
-      "dest": "/web_frontend/dist/assets/$1"
-    },
-    {
-      "src": "/icon.png",
-      "dest": "/web_frontend/dist/icon.png"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/web_frontend/dist/index.html"
-    }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/web_frontend/dist/$1" }
   ]
 }
