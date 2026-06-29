@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recap-ai-gpu-worker
+  namespace: recap-ai
+  labels:
+    app: recap-ai-gpu-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: recap-ai-gpu-worker
+  template:
+    metadata:
+      labels:
+        app: recap-ai-gpu-worker
+    spec:
+      containers:
+      - name: gpu-worker
+        image: recapai/gpu-worker:latest
+        env:
+        - name: REDIS_URL
+          value: "redis://redis-service:6379/0"
+        - name: CUDA_VISIBLE_DEVICES
+          value: "0"
+        - name: GPU_ENABLED
+          value: "true"
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "2"
+            nvidia.com/gpu: 1
+          limits:
+            memory: "16Gi"
+            cpu: "8"
+            nvidia.com/gpu: 1
+        volumeMounts:
+        - name: nvidia-libs
+          mountPath: /usr/local/nvidia
+      volumes:
+      - name: nvidia-libs
+        hostPath:
+          path: /usr/lib/x86_64-linux-gnu
+      tolerations:
+      - key: "nvidia.com/gpu"
+        operator: "Exists"
+        effect: "NoSchedule"
+      nodeSelector:
+        gpu: "true"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recap-ai-celery-worker
+  namespace: recap-ai
+  labels:
+    app: recap-ai-celery-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: recap-ai-celery-worker
+  template:
+    metadata:
+      labels:
+        app: recap-ai-celery-worker
+    spec:
+      containers:
+      - name: celery
+        image: recapai/backend:latest
+        command: ["celery", "-A", "app.core.redis", "worker", "--loglevel=info", "--concurrency=4"]
+        env:
+        - name: REDIS_URL
+          value: "redis://redis-service:6379/0"
+        - name: CELERY_BROKER_URL
+          value: "redis://redis-service:6379/0"
+        - name: CELERY_RESULT_BACKEND
+          value: "redis://redis-service:6379/0"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: recap-ai
+spec:
+  selector:
+    app: redis
+  ports:
+  - port: 6379
+    targetPort: 6379
+  type: ClusterIP

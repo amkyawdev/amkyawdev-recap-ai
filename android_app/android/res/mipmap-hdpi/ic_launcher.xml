@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Background Circle -->
+    <path
+        android:fillColor="#6200EE"
+        android:pathData="M24,24m-22,0a22,22 0,1 1,44 0a22,22 0,1 1,-44 0"/>
+    
+    <!-- Video Play Icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M16,12v24l20,-12z"/>
+    
+    <!-- AI Sparkle -->
+    <path
+        android:fillColor="#03DAC6"
+        android:pathData="M38,8l3,8l8,3l-8,3l-3,8l-3,-8l-8,-3l8,-3z"/>
+</vector>
