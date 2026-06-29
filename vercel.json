@@ -3,16 +3,34 @@
   "builds": [
     {
       "src": "api/**/*.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "10mb"
+      }
     }
   ],
   "routes": [
     {
-      "src": "/api/openrouter(.*)",
+      "src": "/api/openrouter/(.*)",
+      "dest": "/api/openrouter.py/$1"
+    },
+    {
+      "src": "/api/openrouter",
       "dest": "/api/openrouter.py"
     }
   ],
   "env": {
     "OPENROUTER_API_KEY": "@openrouter_api_key"
+  },
+  "buildCommand": "pip install -r requirements.txt",
+  "installCommand": "pip install -r requirements.txt",
+  "outputDirectory": "api",
+  "framework": null,
+  "regions": ["sin1"],
+  "functions": {
+    "api/openrouter.py": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
   }
 }
