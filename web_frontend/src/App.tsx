@@ -113,6 +113,56 @@ function App() {
   const [captionText, setCaptionText] = useState<string>('');
   const [overlayText, setOverlayText] = useState<string>('');
   
+  // Subtitles/SRT state
+  const [subtitles, setSubtitles] = useState<Array<{start: string, end: string, text: string}>>([]);
+  const [srtFile, setSrtFile] = useState<File | null>(null);
+  const [showSubtitles, setShowSubtitles] = useState(true);
+  
+  // Parse SRT file
+  const parseSRT = (content: string) => {
+    const blocks = content.trim().split(/\n\n+/);
+    const parsed = blocks.map(block => {
+      const lines = block.split('\n');
+      const timeLine = lines[1] || '';
+      const [start, end] = timeLine.split(' --> ') || [];
+      const text = lines.slice(2).join('\n');
+      return { start: start || '', end: end || '', text: text || '' };
+    });
+    setSubtitles(parsed);
+  };
+  
+  const handleSRTUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSrtFile(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target?.result as string;
+        parseSRT(content);
+      };
+      reader.readAsText(file);
+    }
+  };
+  
+  const updateSubtitle = (index: number, field: 'start' | 'end' | 'text', value: string) => {
+    const newSubtitles = [...subtitles];
+    newSubtitles[index] = { ...newSubtitles[index], [field]: value };
+    setSubtitles(newSubtitles);
+  };
+  
+  const exportSRT = () => {
+    const srtContent = subtitles.map((sub, i) => 
+      `${i + 1}\n${sub.start} --> ${sub.end}\n${sub.text}\n`
+    ).join('\n');
+    const blob = new Blob([srtContent], { type: 'text/srt' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'subtitles.srt';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  
   // Export screen state
   const [exportFormat, setExportFormat] = useState('mp4');
   const [exportQuality, setExportQuality] = useState('high');
@@ -342,29 +392,50 @@ function App() {
         <div className="flex-1 p-4">
           <div className="bg-black rounded-2xl overflow-hidden relative shadow-2xl shadow-violet-500/10" style={{ aspectRatio: '16/9' }}>
             {videoUrl ? (
-              <video 
-                ref={videoRef}
-                src={videoUrl}
-                className="w-full h-full object-contain"
-                style={{
-                  filter: appliedEffect === 'Blur' ? 'blur(3px)' :
-                         appliedEffect === 'Vignette' ? 'brightness(0.7) vignette()' :
-                         appliedEffect === 'Grain' ? 'contrast(1.2) brightness(1.1)' :
-                         appliedEffect === 'Glitch' ? 'hue-rotate(90deg) saturate(1.5)' :
-                         appliedEffect === 'Chromatic' ? 'hue-rotate(20deg) saturate(1.3)' :
-                         appliedEffect === 'VHS' ? 'contrast(1.3) saturate(0.8) blur(0.5px)' :
-                         appliedFilter === 'warm' ? 'sepia(0.3) saturate(1.2)' :
-                         appliedFilter === 'cool' ? 'saturate(0.9) hue-rotate(20deg)' :
-                         appliedFilter === 'B&W' ? 'grayscale(1)' :
-                         appliedFilter === 'sepia' ? 'sepia(0.8)' :
-                         appliedFilter === 'vivid' ? 'saturate(1.5) contrast(1.1)' :
-                         appliedFilter === 'muted' ? 'saturate(0.7) brightness(1.1)' :
-                         appliedFilter === 'dramatic' ? 'contrast(1.3) brightness(0.9)' :
-                         'none'
-                }}
-                onTimeUpdate={handleTimeUpdate}
-                onLoadedMetadata={handleLoadedMetadata}
-              />
+              <div className="relative w-full h-full">
+                <video 
+                  ref={videoRef}
+                  src={videoUrl}
+                  className="w-full h-full object-contain"
+                  style={{
+                    filter: appliedEffect === 'Blur' ? 'blur(3px)' :
+                           appliedEffect === 'Vignette' ? 'brightness(0.7)' :
+                           appliedEffect === 'Grain' ? 'contrast(1.2) brightness(1.1)' :
+                           appliedEffect === 'Glitch' ? 'hue-rotate(90deg) saturate(1.5)' :
+                           appliedEffect === 'Chromatic' ? 'hue-rotate(20deg) saturate(1.3)' :
+                           appliedEffect === 'VHS' ? 'contrast(1.3) saturate(0.8) blur(0.5px)' :
+                           appliedFilter === 'warm' ? 'sepia(0.3) saturate(1.2)' :
+                           appliedFilter === 'cool' ? 'saturate(0.9) hue-rotate(20deg)' :
+                           appliedFilter === 'B&W' ? 'grayscale(1)' :
+                           appliedFilter === 'sepia' ? 'sepia(0.8)' :
+                           appliedFilter === 'vivid' ? 'saturate(1.5) contrast(1.1)' :
+                           appliedFilter === 'muted' ? 'saturate(0.7) brightness(1.1)' :
+                           appliedFilter === 'dramatic' ? 'contrast(1.3) brightness(0.9)' :
+                           'none'
+                  }}
+                  onTimeUpdate={handleTimeUpdate}
+                  onLoadedMetadata={handleLoadedMetadata}
+                />
+                {/* Subtitle Display */}
+                {showSubtitles && subtitles.length > 0 && (
+                  <div className="absolute bottom-8 left-0 right-0 text-center pointer-events-none">
+                    <div className="inline-block bg-black/80 text-white px-4 py-2 rounded-lg text-sm font-medium max-w-lg mx-auto">
+                      {(() => {
+                        // Find current subtitle based on time
+                        const timeInSeconds = currentTime;
+                        const currentSub = subtitles.find(sub => {
+                          const [h, m, s] = (sub.start || '0:0:0').replace(',', '.').split(':').map(Number);
+                          const startSec = (h || 0) * 3600 + (m || 0) * 60 + (s || 0);
+                          const [h2, m2, s2] = (sub.end || '0:0:0').replace(',', '.').split(':').map(Number);
+                          const endSec = (h2 || 0) * 3600 + (m2 || 0) * 60 + (s2 || 0);
+                          return timeInSeconds >= startSec && timeInSeconds <= endSec;
+                        });
+                        return currentSub ? currentSub.text : '';
+                      })()}
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="flex items-center justify-center h-full bg-gradient-to-br from-slate-800 to-slate-900">
                 <div className="text-center text-slate-500">
@@ -468,14 +539,82 @@ function App() {
                 </div>
               )}
               {activeTool === 'captions' && (
-                <div className="space-y-3">
-                  <p className="text-sm text-slate-400">Add subtitles to your video.</p>
-                  <textarea 
-                    placeholder="Enter captions text..." 
-                    className="w-full bg-slate-700/50 rounded-lg p-3 text-sm h-24 resize-none"
-                  />
-                  <button className="w-full bg-violet-500 hover:bg-violet-600 py-2 rounded-lg text-sm">
-                    Generate Captions
+                <div className="space-y-3 max-h-80 overflow-y-auto">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-slate-400">Subtitles Editor</p>
+                    <button 
+                      onClick={() => setShowSubtitles(!showSubtitles)}
+                      className={`px-3 py-1 rounded-full text-xs ${showSubtitles ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700/50 text-slate-400'}`}
+                    >
+                      {showSubtitles ? '✓ Visible' : 'Hidden'}
+                    </button>
+                  </div>
+                  
+                  {/* Upload SRT */}
+                  <label className="flex items-center justify-center gap-2 bg-slate-700/50 hover:bg-slate-600/50 py-3 px-4 rounded-lg text-sm cursor-pointer border border-dashed border-slate-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                    Upload SRT File
+                    <input type="file" accept=".srt" className="hidden" onChange={handleSRTUpload} />
+                  </label>
+                  
+                  {/* Subtitle List */}
+                  {subtitles.length > 0 ? (
+                    <>
+                      <div className="space-y-2">
+                        {subtitles.map((sub, i) => (
+                          <div key={i} className="bg-slate-700/30 rounded-lg p-3 border border-slate-600/30">
+                            <div className="flex items-center gap-2 mb-2 text-xs text-slate-500">
+                              <span className="bg-violet-500/20 px-2 py-0.5 rounded">#{i + 1}</span>
+                              <input 
+                                type="text" 
+                                value={sub.start}
+                                onChange={(e) => updateSubtitle(i, 'start', e.target.value)}
+                                className="w-24 bg-slate-700/50 px-2 py-1 rounded text-xs"
+                                placeholder="00:00:00,000"
+                              />
+                              <span className="text-slate-600">→</span>
+                              <input 
+                                type="text" 
+                                value={sub.end}
+                                onChange={(e) => updateSubtitle(i, 'end', e.target.value)}
+                                className="w-24 bg-slate-700/50 px-2 py-1 rounded text-xs"
+                                placeholder="00:00:00,000"
+                              />
+                            </div>
+                            <textarea 
+                              value={sub.text}
+                              onChange={(e) => updateSubtitle(i, 'text', e.target.value)}
+                              className="w-full bg-slate-700/50 rounded p-2 text-sm resize-none h-12"
+                              placeholder="Subtitle text..."
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={exportSRT}
+                          className="flex-1 bg-emerald-500 hover:bg-emerald-600 py-2 rounded-lg text-sm"
+                        >
+                          Export SRT
+                        </button>
+                        <button 
+                          onClick={() => setSubtitles([])}
+                          className="px-4 bg-red-500/20 hover:bg-red-500/30 text-red-400 py-2 rounded-lg text-sm"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-center text-slate-500 text-sm py-4">
+                      No subtitles loaded. Upload an SRT file or create new subtitles.
+                    </p>
+                  )}
+                  
+                  {/* Generate with AI */}
+                  <button className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 py-2 rounded-lg text-sm flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/></svg>
+                    Generate with AI
                   </button>
                 </div>
               )}
