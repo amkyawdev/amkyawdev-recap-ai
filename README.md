@@ -1,22 +1,18 @@
 # Recap AI 🎬
 
-<p align="center">
-  <img src="android_app/icon.png" width="120" alt="Recap AI Logo">
-</p>
-
-<p align="center">
-  <strong>AI-Powered Video Recap Generator with GPU Acceleration</strong>
-  <br>
+<div align="center">
+  <img src="https://raw.githubusercontent.com/amkyawdev/amkyawdev-recap-ai/main/android_app/icon.png" width="150" alt="Recap AI Logo">
+  
+  **AI-Powered Video Recap Generator with GPU Acceleration**
+  
   FastAPI Backend • KivyMD Android App • React Web Frontend
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.11+-blue.svg" alt="Python">
-  <img src="https://img.shields.io/badge/FastAPI-0.109-green.svg" alt="FastAPI">
-  <img src="https://img.shields.io/badge/React-18-61DAFB.svg" alt="React">
-  <img src="https://img.shields.io/badge/CUDA-12.3-76B900.svg" alt="CUDA">
-  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
-</p>
+  
+  ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
+  ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green.svg)
+  ![React](https://img.shields.io/badge/React-18-61DAFB.svg)
+  ![CUDA](https://img.shields.io/badge/CUDA-12.3-76B900.svg)
+  ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+</div>
 
 ---
 
