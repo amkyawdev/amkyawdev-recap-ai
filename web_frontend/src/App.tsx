@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { generateRecap, type RecapRequest } from './api/client'
+import LoadingScreen from './components/LoadingScreen'
 
 // Icons
 const SettingsIcon = () => (
@@ -77,8 +78,14 @@ const SparklesIcon = () => (
 type Screen = 'home' | 'recap' | 'editor' | 'export';
 
 function App() {
+  const [loading, setLoading] = useState(true);
   const [screen, setScreen] = useState<Screen>('home');
   const [gpuAvailable] = useState(true);
+
+  // Show loading screen on initial load
+  if (loading) {
+    return <LoadingScreen onComplete={() => setLoading(false)} minDuration={2500} />;
+  }
   
   // Video state
   const [videoFile, setVideoFile] = useState<File | null>(null);
