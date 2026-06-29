@@ -121,13 +121,25 @@ function App() {
   // Parse SRT file
   const parseSRT = (content: string) => {
     const blocks = content.trim().split(/\n\n+/);
-    const parsed = blocks.map(block => {
-      const lines = block.split('\n');
-      const timeLine = lines[1] || '';
-      const [start, end] = timeLine.split(' --> ') || [];
-      const text = lines.slice(2).join('\n');
-      return { start: start || '', end: end || '', text: text || '' };
+    const parsed: Array<{start: string, end: string, text: string}> = [];
+    
+    blocks.forEach(block => {
+      const lines = block.split('\n').filter(line => line.trim());
+      if (lines.length >= 2) {
+        const timeLine = lines.find(line => line.includes('-->'));
+        const textLines = lines.slice(lines.indexOf(timeLine!) + 1);
+        const [start, end] = (timeLine || '').split(' --> ') || [];
+        
+        if (start && end) {
+          parsed.push({
+            start: start.trim(),
+            end: end.trim(),
+            text: textLines.join('\n').trim()
+          });
+        }
+      }
     });
+    
     setSubtitles(parsed);
   };
   
@@ -262,10 +274,10 @@ function App() {
         if (prev >= 100) {
           clearInterval(interval);
           setExporting(false);
-          alert('Export completed!');
+          alert('Export completed! Download will start shortly.');
           return 100;
         }
-        return prev + 10;
+        return prev + 5;
       });
     }, 500);
   };
@@ -394,24 +406,28 @@ function App() {
             {videoUrl ? (
               <div className="relative w-full h-full">
                 <video 
+                  key="main-video"
                   ref={videoRef}
                   src={videoUrl}
                   className="w-full h-full object-contain"
                   style={{
-                    filter: appliedEffect === 'Blur' ? 'blur(3px)' :
-                           appliedEffect === 'Vignette' ? 'brightness(0.7)' :
-                           appliedEffect === 'Grain' ? 'contrast(1.2) brightness(1.1)' :
-                           appliedEffect === 'Glitch' ? 'hue-rotate(90deg) saturate(1.5)' :
-                           appliedEffect === 'Chromatic' ? 'hue-rotate(20deg) saturate(1.3)' :
-                           appliedEffect === 'VHS' ? 'contrast(1.3) saturate(0.8) blur(0.5px)' :
-                           appliedFilter === 'warm' ? 'sepia(0.3) saturate(1.2)' :
-                           appliedFilter === 'cool' ? 'saturate(0.9) hue-rotate(20deg)' :
-                           appliedFilter === 'B&W' ? 'grayscale(1)' :
-                           appliedFilter === 'sepia' ? 'sepia(0.8)' :
-                           appliedFilter === 'vivid' ? 'saturate(1.5) contrast(1.1)' :
-                           appliedFilter === 'muted' ? 'saturate(0.7) brightness(1.1)' :
-                           appliedFilter === 'dramatic' ? 'contrast(1.3) brightness(0.9)' :
-                           'none'
+                    filter: (() => {
+                      const filters: string[] = [];
+                      if (appliedEffect === 'Blur') filters.push('blur(5px)');
+                      if (appliedEffect === 'Vignette') filters.push('brightness(0.6)');
+                      if (appliedEffect === 'Grain') filters.push('contrast(1.3) brightness(1.1)');
+                      if (appliedEffect === 'Glitch') filters.push('hue-rotate(90deg) saturate(1.8)');
+                      if (appliedEffect === 'Chromatic') filters.push('hue-rotate(30deg) saturate(1.4)');
+                      if (appliedEffect === 'VHS') filters.push('contrast(1.4) saturate(0.7) blur(1px)');
+                      if (appliedFilter === 'warm') filters.push('sepia(0.4) saturate(1.3)');
+                      if (appliedFilter === 'cool') filters.push('hue-rotate(25deg) saturate(0.9)');
+                      if (appliedFilter === 'B&W') filters.push('grayscale(1)');
+                      if (appliedFilter === 'sepia') filters.push('sepia(1)');
+                      if (appliedFilter === 'vivid') filters.push('saturate(1.8) contrast(1.15)');
+                      if (appliedFilter === 'muted') filters.push('saturate(0.6) brightness(1.1)');
+                      if (appliedFilter === 'dramatic') filters.push('contrast(1.5) brightness(0.85)');
+                      return filters.length > 0 ? filters.join(' ') : 'none';
+                    })()
                   }}
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={handleLoadedMetadata}
@@ -509,11 +525,28 @@ function App() {
                 <div className="space-y-3">
                   <p className="text-sm text-slate-400">Select start and end points to trim your video.</p>
                   <div className="flex gap-2">
-                    <button className="flex-1 bg-violet-500/20 hover:bg-violet-500/30 text-violet-300 py-2 px-4 rounded-lg text-sm">
-                      Set Start
+                    <button 
+                      onClick={() => setTrimStart(currentTime)}
+                      className="flex-1 bg-violet-500/20 hover:bg-violet-500/30 text-violet-300 py-2 px-4 rounded-lg text-sm"
+                    >
+                      Set Start: {formatTime(trimStart)}
                     </button>
-                    <button className="flex-1 bg-violet-500/20 hover:bg-violet-500/30 text-violet-300 py-2 px-4 rounded-lg text-sm">
-                      Set End
+                    <button 
+                      onClick={() => setTrimEnd(currentTime || duration)}
+                      className="flex-1 bg-violet-500/20 hover:bg-violet-500/30 text-violet-300 py-2 px-4 rounded-lg text-sm"
+                    >
+                      Set End: {formatTime(trimEnd)}
+                    </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => { setTrimStart(0); setTrimEnd(0); }}
+                      className="flex-1 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 py-2 px-4 rounded-lg text-sm"
+                    >
+                      Reset
+                    </button>
+                    <button className="flex-1 bg-violet-500 hover:bg-violet-600 text-white py-2 px-4 rounded-lg text-sm">
+                      Apply Trim
                     </button>
                   </div>
                 </div>
