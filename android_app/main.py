@@ -35,6 +35,7 @@ from kivymd.uix.screenmanager import MDScreenManager
 from kivymd.theming import ThemeManager
 from kivymd.font_definitions import theme_font_styles
 
+from screens.loading_screen import LoadingScreen
 from screens.home import HomeScreen
 from screens.editor.timeline_widget import TimelineWidget
 from screens.editor.preview_widget import PreviewWidget
@@ -52,17 +53,26 @@ class RecapAIApp(MDApp):
     title = "Recap AI"
     theme_cls = ThemeManager()
     
-    # Theme colors
+    # Theme colors - matching web design with violet/fuchsia gradient
     theme_colors = {
-        'primary': '#6200EE',
-        'secondary': '#03DAC6',
-        'background': '#121212',
-        'surface': '#1E1E1E',
-        'error': '#CF6679',
+        # Modern violet/fuchsia theme matching web
+        'primary': '#8B5CF6',        # violet-500
+        'secondary': '#A855F7',      # purple-500
+        'accent': '#D946EF',         # fuchsia-500
+        'background': '#0F0F1A',     # slate-950
+        'surface': '#1E1E2E',        # slate-800/60
+        'surface_variant': '#27273A', # slate-700/50
+        'error': '#F43F5E',          # rose-500
+        'success': '#10B981',        # emerald-500
         'on_primary': '#FFFFFF',
-        'on_secondary': '#000000',
+        'on_secondary': '#FFFFFF',
         'on_background': '#FFFFFF',
         'on_surface': '#FFFFFF',
+        # Gradient colors
+        'violet': '#8B5CF6',
+        'fuchsia': '#D946EF',
+        'purple': '#A855F7',
+        'emerald': '#10B981',
     }
     
     def __init__(self, **kwargs):
@@ -75,6 +85,7 @@ class RecapAIApp(MDApp):
         # App state
         self.current_project = None
         self.gpu_available = False
+        self.is_loading = True
         
     def build(self):
         """Build the application"""
@@ -83,7 +94,10 @@ class RecapAIApp(MDApp):
         # Screen manager
         sm = MDScreenManager()
         
-        # Add screens
+        # Add loading screen first
+        sm.add_widget(LoadingScreen(name='loading'))
+        
+        # Add main screens
         sm.add_widget(HomeScreen(name='home'))
         sm.add_widget(RecapScreen(name='recap'))
         sm.add_widget(ExportScreen(name='export'))
@@ -95,17 +109,19 @@ class RecapAIApp(MDApp):
         return sm
     
     def setup_theme(self):
-        """Setup app theme"""
+        """Setup app theme with modern violet/fuchsia colors"""
         self.theme_cls.primary_palette = 'DeepPurple'
-        self.theme_cls.accent_palette = 'Teal'
+        self.theme_cls.accent_palette = 'Purple'
         self.theme_cls.theme_style = 'Dark'
         
-        # Custom colors
+        # Update colors with custom violet/fuchsia theme
         self.theme_cls.colors.update({
             'Primary': self.theme_colors['primary'],
             'Secondary': self.theme_colors['secondary'],
+            'Accent': self.theme_colors['accent'],
             'Background': self.theme_colors['background'],
             'Surface': self.theme_colors['surface'],
+            'Error': self.theme_colors['error'],
         })
     
     def on_start(self):
