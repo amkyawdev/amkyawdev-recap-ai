@@ -59,6 +59,7 @@ jobs:
       - name: Build debug APK
         run: |
           cd android_app
+          yes | buildozer android debug || true
           buildozer android debug
         env:
           BUILDZER_SPEC: android_app/buildozer.spec
