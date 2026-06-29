@@ -4,16 +4,17 @@
 title = Recap AI
 package.name = recapai
 package.domain = com.amkyawdev
+version = 0.1
 
 # App icon
 icon = icon.png
 
 # Source directories
 source.dir = .
-source.include_exts = py,png,jpg,kv,atlas
+source.include_exts = py,png,jpg,kv,atlas,ptt
 
 # Requirements
-requirements = python3,kivy==2.2.0,kivymd,httpx,aiofiles
+requirements = python3,kivy==2.2.0,kivymd,httpx,aiofiles,pyjnius
 
 # Android specific
 android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,CAMERA
