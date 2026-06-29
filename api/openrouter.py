@@ -367,7 +367,7 @@ Keep it engaging and concise for a {duration_minutes} minute video."""
 
 
 # Vercel Serverless Function Handler
-def handler(request):
+def handler(event, context=None):
     """
     Vercel serverless function handler
     
@@ -383,23 +383,28 @@ def handler(request):
     - POST /api/openrouter/topics - Extract key topics
     - POST /api/openrouter/hashtags - Generate hashtags
     """
-    from urllib.parse import urlparse
-    
-    # Parse request
-    parsed_path = urlparse(request.url.path)
-    path = parsed_path.path.replace("/api/openrouter", "").strip("/")
-    
     # CORS headers
-    headers = {
+    cors_headers = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Content-Type": "application/json",
     }
     
     # Handle preflight
-    if request.method == "OPTIONS":
-        return {"statusCode": 200, "headers": headers, "body": ""}
+    method = event.get("method", "GET")
+    if method == "OPTIONS":
+        return {"statusCode": 200, "headers": cors_headers, "body": ""}
+    
+    # Parse request
+    path = event.get("path", "/")
+    path = path.replace("/api/openrouter", "").strip("/")
+    
+    # Parse body
+    body_str = event.get("body", "{}")
+    if isinstance(body_str, str):
+        body = json.loads(body_str or "{}")
+    else:
+        body = body_str or {}
     
     # Initialize client
     try:
@@ -407,17 +412,11 @@ def handler(request):
     except ValueError as e:
         return {
             "statusCode": 500,
-            "headers": headers,
+            "headers": {**cors_headers, "Content-Type": "application/json"},
             "body": json.dumps({"error": str(e)}),
         }
     
     try:
-        # Parse body
-        if request.method in ["POST", "PUT"]:
-            body = json.loads(request.body or "{}")
-        else:
-            body = {}
-        
         # Route to appropriate handler
         if path == "recap":
             result = handle_recap(client, body)
@@ -434,20 +433,20 @@ def handler(request):
         else:
             return {
                 "statusCode": 404,
-                "headers": headers,
-                "body": json.dumps({"error": "Endpoint not found"}),
+                "headers": {**cors_headers, "Content-Type": "application/json"},
+                "body": json.dumps({"error": "Endpoint not found", "path": path}),
             }
         
         return {
             "statusCode": 200,
-            "headers": headers,
+            "headers": {**cors_headers, "Content-Type": "application/json"},
             "body": json.dumps(result),
         }
         
     except Exception as e:
         return {
             "statusCode": 500,
-            "headers": headers,
+            "headers": {**cors_headers, "Content-Type": "application/json"},
             "body": json.dumps({"error": str(e)}),
         }
 
