@@ -1,1 +1,1 @@
-{"rootDirectory": "web_frontend", "builds": [], "routes": [{"src": "/(.*)", "dest": "/$1"}]}
+{"framework": null, "buildCommand": "npm run build", "outputDirectory": "dist", "installCommand": "npm install"}
