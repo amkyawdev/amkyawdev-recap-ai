@@ -1,5 +1,9 @@
 {
+  "buildCommand": "cd web_frontend && npm install && npm run build",
+  "outputDirectory": "web_frontend/dist",
+  "installCommand": "npm install",
+  "framework": null,
   "rewrites": [
-    { "source": "/(.*)", "destination": "/web_frontend/dist/$1" }
+    { "source": "/(.*)", "destination": "/$1" }
   ]
 }
