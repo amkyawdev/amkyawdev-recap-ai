@@ -101,6 +101,10 @@ function App() {
   const [recapLoading, setRecapLoading] = useState(false);
   const [error, setError] = useState('');
   
+  // Editor tools state
+  const [activeTool, setActiveTool] = useState<string | null>(null);
+  const [showToolsPanel, setShowToolsPanel] = useState(false);
+  
   // Export screen state
   const [exportFormat, setExportFormat] = useState('mp4');
   const [exportQuality, setExportQuality] = useState('high');
@@ -350,20 +354,113 @@ function App() {
         <div className="px-4 pb-2">
           <div className="flex gap-2 overflow-x-auto pb-2">
             {[
-              { icon: <CutIcon />, label: 'Trim' },
-              { icon: <EffectsIcon />, label: 'Effects' },
-              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>, label: 'Captions' },
-              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>, label: 'Text' },
-              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>, label: 'Filters' },
-              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3"/><path d="M4 12h16"/></svg>, label: 'Merge' },
-            ].map((tool, i) => (
-              <button key={i} className="bg-slate-800/60 backdrop-blur-xl rounded-xl p-3 border border-slate-700/50 hover:border-violet-500/50 transition-all min-w-[70px]">
-                <div className="text-slate-400 flex justify-center mb-1">{tool.icon}</div>
-                <span className="text-xs text-slate-400">{tool.label}</span>
+              { id: 'trim', icon: <CutIcon />, label: 'Trim' },
+              { id: 'effects', icon: <EffectsIcon />, label: 'Effects' },
+              { id: 'captions', icon: <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>, label: 'Captions' },
+              { id: 'text', icon: <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>, label: 'Text' },
+              { id: 'filters', icon: <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>, label: 'Filters' },
+              { id: 'merge', icon: <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3"/><path d="M4 12h16"/></svg>, label: 'Merge' },
+            ].map((tool) => (
+              <button 
+                key={tool.id}
+                onClick={() => setActiveTool(activeTool === tool.id ? null : tool.id)}
+                className={`bg-slate-800/60 backdrop-blur-xl rounded-xl p-3 border transition-all min-w-[70px] ${
+                  activeTool === tool.id 
+                    ? 'border-violet-500 bg-violet-500/20' 
+                    : 'border-slate-700/50 hover:border-violet-500/50'
+                }`}
+              >
+                <div className={`flex justify-center mb-1 ${activeTool === tool.id ? 'text-violet-400' : 'text-slate-400'}`}>
+                  {tool.icon}
+                </div>
+                <span className={`text-xs ${activeTool === tool.id ? 'text-violet-400' : 'text-slate-400'}`}>{tool.label}</span>
               </button>
             ))}
           </div>
         </div>
+        
+        {/* Active Tool Panel */}
+        {activeTool && (
+          <div className="px-4 pb-2">
+            <div className="bg-slate-800/80 backdrop-blur-xl rounded-xl p-4 border border-violet-500/30">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-violet-400 capitalize">{activeTool} Tools</h3>
+                <button onClick={() => setActiveTool(null)} className="text-slate-400 hover:text-white">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+              </div>
+              {activeTool === 'trim' && (
+                <div className="space-y-3">
+                  <p className="text-sm text-slate-400">Select start and end points to trim your video.</p>
+                  <div className="flex gap-2">
+                    <button className="flex-1 bg-violet-500/20 hover:bg-violet-500/30 text-violet-300 py-2 px-4 rounded-lg text-sm">
+                      Set Start
+                    </button>
+                    <button className="flex-1 bg-violet-500/20 hover:bg-violet-500/30 text-violet-300 py-2 px-4 rounded-lg text-sm">
+                      Set End
+                    </button>
+                  </div>
+                </div>
+              )}
+              {activeTool === 'effects' && (
+                <div className="space-y-3">
+                  <p className="text-sm text-slate-400">Apply visual effects to your video.</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {['Blur', 'Vignette', 'Grain', 'Glitch', 'Chromatic', 'VHS'].map((effect) => (
+                      <button key={effect} className="bg-slate-700/50 hover:bg-slate-600/50 py-2 px-3 rounded-lg text-sm">
+                        {effect}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {activeTool === 'captions' && (
+                <div className="space-y-3">
+                  <p className="text-sm text-slate-400">Add subtitles to your video.</p>
+                  <textarea 
+                    placeholder="Enter captions text..." 
+                    className="w-full bg-slate-700/50 rounded-lg p-3 text-sm h-24 resize-none"
+                  />
+                  <button className="w-full bg-violet-500 hover:bg-violet-600 py-2 rounded-lg text-sm">
+                    Generate Captions
+                  </button>
+                </div>
+              )}
+              {activeTool === 'text' && (
+                <div className="space-y-3">
+                  <p className="text-sm text-slate-400">Add text overlays to your video.</p>
+                  <input type="text" placeholder="Enter text..." className="w-full bg-slate-700/50 rounded-lg p-3 text-sm" />
+                  <div className="flex gap-2">
+                    <button className="flex-1 bg-slate-700/50 hover:bg-slate-600/50 py-2 px-3 rounded-lg text-sm">Bold</button>
+                    <button className="flex-1 bg-slate-700/50 hover:bg-slate-600/50 py-2 px-3 rounded-lg text-sm">Italic</button>
+                    <button className="flex-1 bg-slate-700/50 hover:bg-slate-600/50 py-2 px-3 rounded-lg text-sm">Shadow</button>
+                  </div>
+                </div>
+              )}
+              {activeTool === 'filters' && (
+                <div className="space-y-3">
+                  <p className="text-sm text-slate-400">Apply color filters to your video.</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {['None', 'Warm', 'Cool', 'B&W', 'Sepia', 'Vivid', 'Muted', 'Dramatic'].map((filter) => (
+                      <button key={filter} className="bg-slate-700/50 hover:bg-slate-600/50 py-2 px-2 rounded-lg text-xs">
+                        {filter}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {activeTool === 'merge' && (
+                <div className="space-y-3">
+                  <p className="text-sm text-slate-400">Merge multiple videos together.</p>
+                  <label className="block bg-slate-700/50 hover:bg-slate-600/50 py-3 px-4 rounded-lg text-sm text-center cursor-pointer">
+                    + Add Video to Merge
+                    <input type="file" accept="video/*" className="hidden" />
+                  </label>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Timeline */}
         <div className="px-4 pb-2">
