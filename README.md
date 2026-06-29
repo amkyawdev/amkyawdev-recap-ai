@@ -1,6 +1,38 @@
-# amkyawdev-recap-ai
+# Recap AI 🎬
 
-AI-powered video recap generator with GPU acceleration and OpenRouter API integration.
+<p align="center">
+  <img src="android_app/icon.png" width="120" alt="Recap AI Logo">
+</p>
+
+<p align="center">
+  <strong>AI-Powered Video Recap Generator with GPU Acceleration</strong>
+  <br>
+  FastAPI Backend • KivyMD Android App • React Web Frontend
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.11+-blue.svg" alt="Python">
+  <img src="https://img.shields.io/badge/FastAPI-0.109-green.svg" alt="FastAPI">
+  <img src="https://img.shields.io/badge/React-18-61DAFB.svg" alt="React">
+  <img src="https://img.shields.io/badge/CUDA-12.3-76B900.svg" alt="CUDA">
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
+</p>
+
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---------|-------------|
+| 🤖 **AI Recap** | Generate engaging video scripts from transcripts |
+| 🎙️ **Speech-to-Text** | Whisper-powered transcription with 90+ languages |
+| 🌐 **Translation** | Multi-language subtitle generation |
+| 🎨 **AI Effects** | Background removal, auto-captions, super resolution |
+| ⚡ **GPU Rendering** | NVIDIA NVENC accelerated video processing |
+| 🔄 **Hybrid Rendering** | Smart on-device vs cloud decision engine |
+| 📱 **Cross-Platform** | Android, Web, Desktop support |
+
+---
 
 ## 🚀 Quick Start
 
@@ -175,12 +207,66 @@ python api/openrouter.py
 ## 📁 Project Structure
 
 ```
-├── api/
-│   ├── openrouter.py      # Main API handler
-│   └── index.js           # Vercel entry point
-├── api-example.js         # Frontend examples
-├── vercel.json            # Vercel config
-└── .env.example          # Environment template
+amkyawdev-recap-ai/
+│
+├── 📂 backend/                          # FastAPI Backend
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── endpoints/
+│   │   │   │   ├── recap.py              # AI Recap logic
+│   │   │   │   ├── voice.py              # TTS logic
+│   │   │   │   ├── video_edit.py         # Video editing
+│   │   │   │   ├── render.py             # GPU rendering
+│   │   │   │   ├── export.py             # Hardware encoding
+│   │   │   │   ├── upload.py             # S3 upload
+│   │   │   │   └── hybrid.py             # Render decision
+│   │   │   └── api_router.py
+│   │   ├── core/
+│   │   │   ├── config.py                 # Settings
+│   │   │   ├── gpu_manager.py            # GPU device management
+│   │   │   ├── redis.py                 # Task queue
+│   │   │   └── storage.py               # S3/R2 client
+│   │   └── services/
+│   │       ├── whisper/                 # Speech-to-text
+│   │       ├── translate/               # Translation
+│   │       ├── ai_effects/              # AI-powered effects
+│   │       └── render_engine/           # GPU rendering
+│   ├── Dockerfile.gpu                   # NVIDIA CUDA base
+│   ├── docker-compose.yml               # GPU-enabled Docker
+│   └── requirements.txt
+│
+├── 📂 android_app/                      # KivyMD Frontend
+│   ├── main.py
+│   ├── buildozer.spec                  # Buildozer config
+│   ├── icon.png                        # App icon
+│   ├── screens/
+│   │   ├── home.py, recap.py, export.py
+│   │   └── editor/
+│   │       ├── editor_screen.py, timeline_widget.py
+│   │       ├── preview_widget.py, tools_panel.py
+│   │       └── gpu_status.py
+│   └── services/
+│       ├── api_client.py, websocket.py
+│       └── render_decision.py
+│
+├── 📂 web_frontend/                     # React Web
+│   ├── package.json
+│   └── src/
+│       ├── components/
+│       ├── store/
+│       └── api/
+│
+├── 📂 infrastructure/                    # IaC
+│   ├── terraform/ (AWS/GCP)
+│   └── kubernetes/
+│
+├── 📂 api/                            # Vercel Serverless
+│   ├── openrouter.py
+│   └── index.js
+│
+├── vercel.json
+├── README.md
+└── .env.example
 ```
 
 ## 💰 Pricing
