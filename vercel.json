@@ -1,1 +1,1 @@
-{"rootDirectory": "web_frontend"}
+{"rootDirectory": "web_frontend", "builds": [], "routes": [{"src": "/(.*)", "dest": "/$1"}]}
