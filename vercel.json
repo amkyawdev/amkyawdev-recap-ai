@@ -12,12 +12,16 @@
   ],
   "routes": [
     {
-      "src": "/api/openrouter/(.*)",
-      "dest": "/api/index.py"
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
     },
     {
-      "src": "/api/openrouter",
-      "dest": "/api/index.py"
+      "src": "/assets/(.*)",
+      "dest": "/web_frontend/dist/assets/$1"
+    },
+    {
+      "src": "/icon.png",
+      "dest": "/web_frontend/dist/icon.png"
     },
     {
       "src": "/(.*)",
