@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { generateRecap, type RecapRequest } from './api/client'
 import LoadingScreen from './components/LoadingScreen'
-import LogoIcon from '../icon.png'
+import LogoIcon from '/icon.png'
 
 // Icons
 const SettingsIcon = () => (
