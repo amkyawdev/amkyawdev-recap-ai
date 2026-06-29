@@ -9,7 +9,9 @@ from kivymd.uix.button import MDFloatingActionButton, MDRaisedButton
 from kivymd.uix.card import MDCardSwipe
 from kivymd.uix.filemanager import MDFileManager
 from kivymd.uix.snackbar import Snackbar
+from kivymd.uix.imageloading import AsyncImage
 from kivy.utils import get_color_from_hex
+import os
 
 Builder.load_string("""
 <HomeScreen>:
@@ -29,10 +31,10 @@ Builder.load_string("""
             height: dp(60)
             spacing: dp(12)
             
-            # Logo icon
+            # Logo icon (Image widget for PNG)
             MDBoxLayout:
                 size_hint: None, None
-                size: dp(44), dp(44)
+                size: dp(48), dp(48)
                 canvas.before:
                     Color:
                         rgba: get_color_from_hex('#8B5CF6')  # violet
@@ -40,13 +42,12 @@ Builder.load_string("""
                         size: self.size
                         pos: self.pos
                         radius: [12]
-                MDIcon:
-                    icon: 'auto-fix'
-                    font_size: '24sp'
-                    halign: 'center'
-                    valign: 'center'
-                    theme_text_color: 'Custom'
-                    text_color: 1, 1, 1, 1
+                Image:
+                    source: 'icon.png'
+                    size_hint: 1, 1
+                    allow_stretch: True
+                    keep_ratio: True
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             
             # Title container
             MDBoxLayout:

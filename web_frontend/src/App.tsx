@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { generateRecap, type RecapRequest } from './api/client'
 import LoadingScreen from './components/LoadingScreen'
+import LogoIcon from '../icon.png'
 
 // Icons
 const SettingsIcon = () => (
@@ -212,9 +213,7 @@ function App() {
           {/* Header */}
           <header className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-                <SparklesIcon />
-              </div>
+              <img src={LogoIcon} alt="Recap AI" className="w-12 h-12 rounded-xl shadow-lg shadow-violet-500/30" />
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-violet-400 via-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
                   Recap AI
@@ -425,9 +424,7 @@ function App() {
               <BackIcon />
             </button>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-                <RobotIcon />
-              </div>
+              <img src={LogoIcon} alt="Recap AI" className="w-10 h-10 rounded-xl shadow-lg" />
               <h1 className="text-xl font-bold">AI Recap Generator</h1>
             </div>
           </header>
@@ -564,9 +561,7 @@ function App() {
               <BackIcon />
             </button>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                <ExportIcon />
-              </div>
+              <img src={LogoIcon} alt="Recap AI" className="w-10 h-10 rounded-xl shadow-lg" />
               <h1 className="text-xl font-bold">Export Video</h1>
             </div>
           </header>
