@@ -117,6 +117,7 @@ function App() {
     if (file) {
       setVideoFile(file);
       setVideoUrl(URL.createObjectURL(file));
+      setScreen('editor');
     }
   };
 
