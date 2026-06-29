@@ -120,6 +120,15 @@ function App() {
     }
   };
 
+  const handleNewProject = () => {
+    // Clear all video state and go to editor
+    setVideoFile(null);
+    setVideoUrl('');
+    setScript('');
+    setTranscript('');
+    setScreen('editor');
+  };
+
   const togglePlay = () => {
     if (videoRef.current) {
       if (isPlaying) {
@@ -248,7 +257,10 @@ function App() {
 
           {/* Action Buttons */}
           <div className="grid grid-cols-2 gap-4 mb-8">
-            <label className="bg-slate-800/60 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-violet-500/50 transition-all cursor-pointer group hover:shadow-lg hover:shadow-violet-500/10">
+            <button 
+              onClick={handleNewProject}
+              className="bg-slate-800/60 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-violet-500/50 transition-all cursor-pointer group hover:shadow-lg hover:shadow-violet-500/10"
+            >
               <div className="flex flex-col items-center gap-3">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-violet-500/30">
                   <PlusIcon />
@@ -256,7 +268,7 @@ function App() {
                 <span className="font-semibold text-lg">New Project</span>
                 <span className="text-sm text-slate-500">Start fresh</span>
               </div>
-            </label>
+            </button>
             <label className="bg-slate-800/60 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-cyan-500/50 transition-all cursor-pointer group hover:shadow-lg hover:shadow-cyan-500/10">
               <div className="flex flex-col items-center gap-3">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-cyan-500/30">
