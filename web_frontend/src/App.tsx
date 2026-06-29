@@ -105,6 +105,14 @@ function App() {
   const [activeTool, setActiveTool] = useState<string | null>(null);
   const [showToolsPanel, setShowToolsPanel] = useState(false);
   
+  // Applied effects state
+  const [appliedEffect, setAppliedEffect] = useState<string | null>(null);
+  const [appliedFilter, setAppliedFilter] = useState<string | null>(null);
+  const [trimStart, setTrimStart] = useState<number>(0);
+  const [trimEnd, setTrimEnd] = useState<number>(0);
+  const [captionText, setCaptionText] = useState<string>('');
+  const [overlayText, setOverlayText] = useState<string>('');
+  
   // Export screen state
   const [exportFormat, setExportFormat] = useState('mp4');
   const [exportQuality, setExportQuality] = useState('high');
@@ -338,6 +346,22 @@ function App() {
                 ref={videoRef}
                 src={videoUrl}
                 className="w-full h-full object-contain"
+                style={{
+                  filter: appliedEffect === 'Blur' ? 'blur(3px)' :
+                         appliedEffect === 'Vignette' ? 'brightness(0.7) vignette()' :
+                         appliedEffect === 'Grain' ? 'contrast(1.2) brightness(1.1)' :
+                         appliedEffect === 'Glitch' ? 'hue-rotate(90deg) saturate(1.5)' :
+                         appliedEffect === 'Chromatic' ? 'hue-rotate(20deg) saturate(1.3)' :
+                         appliedEffect === 'VHS' ? 'contrast(1.3) saturate(0.8) blur(0.5px)' :
+                         appliedFilter === 'warm' ? 'sepia(0.3) saturate(1.2)' :
+                         appliedFilter === 'cool' ? 'saturate(0.9) hue-rotate(20deg)' :
+                         appliedFilter === 'B&W' ? 'grayscale(1)' :
+                         appliedFilter === 'sepia' ? 'sepia(0.8)' :
+                         appliedFilter === 'vivid' ? 'saturate(1.5) contrast(1.1)' :
+                         appliedFilter === 'muted' ? 'saturate(0.7) brightness(1.1)' :
+                         appliedFilter === 'dramatic' ? 'contrast(1.3) brightness(0.9)' :
+                         'none'
+                }}
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
               />
@@ -359,6 +383,14 @@ function App() {
                   {isPlaying ? <PauseIcon /> : <PlayIcon />}
                 </div>
               </button>
+            )}
+            
+            {/* Applied Effect Badge */}
+            {(appliedEffect || appliedFilter) && (
+              <div className="absolute top-4 right-4 bg-violet-500/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-white">
+                {appliedEffect && <span className="mr-2">✨ {appliedEffect}</span>}
+                {appliedFilter && <span>🎨 {appliedFilter}</span>}
+              </div>
             )}
           </div>
         </div>
@@ -420,7 +452,15 @@ function App() {
                   <p className="text-sm text-slate-400">Apply visual effects to your video.</p>
                   <div className="grid grid-cols-3 gap-2">
                     {['Blur', 'Vignette', 'Grain', 'Glitch', 'Chromatic', 'VHS'].map((effect) => (
-                      <button key={effect} className="bg-slate-700/50 hover:bg-slate-600/50 py-2 px-3 rounded-lg text-sm">
+                      <button 
+                        key={effect} 
+                        onClick={() => setAppliedEffect(appliedEffect === effect ? null : effect)}
+                        className={`py-2 px-3 rounded-lg text-sm transition-all ${
+                          appliedEffect === effect
+                            ? 'bg-violet-500 text-white'
+                            : 'bg-slate-700/50 hover:bg-slate-600/50'
+                        }`}
+                      >
                         {effect}
                       </button>
                     ))}
@@ -455,7 +495,15 @@ function App() {
                   <p className="text-sm text-slate-400">Apply color filters to your video.</p>
                   <div className="grid grid-cols-4 gap-2">
                     {['None', 'Warm', 'Cool', 'B&W', 'Sepia', 'Vivid', 'Muted', 'Dramatic'].map((filter) => (
-                      <button key={filter} className="bg-slate-700/50 hover:bg-slate-600/50 py-2 px-2 rounded-lg text-xs">
+                      <button 
+                        key={filter} 
+                        onClick={() => setAppliedFilter(filter === 'None' ? null : filter)}
+                        className={`py-2 px-2 rounded-lg text-xs transition-all ${
+                          appliedFilter === filter || (filter === 'None' && !appliedFilter)
+                            ? 'bg-violet-500 text-white'
+                            : 'bg-slate-700/50 hover:bg-slate-600/50'
+                        }`}
+                      >
                         {filter}
                       </button>
                     ))}
