@@ -1,0 +1,2 @@
+# Vercel Serverless - OpenRouter API
+urllib3>=1.26.0
