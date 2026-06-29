@@ -3,7 +3,7 @@
  */
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api/v1';
+const API_BASE = import.meta.env.VITE_API_URL || '/api/openrouter';
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -31,19 +31,26 @@ export interface RecapRequest {
   transcript: string;
   duration_minutes: number;
   style: string;
-  target_audience: string;
+  target_audience?: string;
 }
 
 export interface RecapResponse {
   success: boolean;
   script: string;
-  duration_estimate: number;
-  key_topics: string[];
-  hashtags: string[];
 }
 
 export const generateRecap = async (data: RecapRequest): Promise<RecapResponse> => {
-  const response = await api.post('/recap/generate', data);
+  const response = await api.post('/recap', data);
+  return response.data;
+};
+
+export const summarizeContent = async (text: string, maxSentences = 5) => {
+  const response = await api.post('/summarize', { text, max_sentences: maxSentences });
+  return response.data;
+};
+
+export const generateHashtags = async (content: string, numHashtags = 10) => {
+  const response = await api.post('/hashtags', { content, num_hashtags: numHashtags });
   return response.data;
 };
 

@@ -7,6 +7,17 @@
       "config": {
         "excludeFiles": "backend/**"
       }
+    },
+    {
+      "src": "web_frontend/dist/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "web_frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     }
   ],
   "routes": [
@@ -17,6 +28,10 @@
     {
       "src": "/api/openrouter",
       "dest": "/api/index.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/web_frontend/dist/$1"
     }
   ]
 }
