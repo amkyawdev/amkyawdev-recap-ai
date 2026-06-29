@@ -3,12 +3,7 @@
   "builds": [
     {
       "src": "api/openrouter.py",
-      "use": "@vercel/python",
-      "config": {
-        "installCommand": "pip3 install -r requirements.txt",
-        "buildCommand": "pip3 install -r requirements.txt",
-        "outputDirectory": "api"
-      }
+      "use": "@vercel/python"
     }
   ],
   "routes": [
@@ -23,6 +18,5 @@
   ],
   "env": {
     "OPENROUTER_API_KEY": "@openrouter_api_key"
-  },
-  "framework": null
+  }
 }
