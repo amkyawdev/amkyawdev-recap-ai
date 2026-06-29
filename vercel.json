@@ -1,6 +1,26 @@
 {
-  "buildCommand": "cd web_frontend && npm install && npm run build",
-  "outputDirectory": "web_frontend/dist",
-  "installCommand": "npm install",
-  "framework": null
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "web_frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/openrouter/(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/web_frontend/dist/$1"
+    }
+  ]
 }

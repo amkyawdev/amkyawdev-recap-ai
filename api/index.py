@@ -1,3 +1,5 @@
-# Simple API endpoint - returns placeholder response
+import json
+
+# Simple API endpoint
 def index(request):
-    return {"status": "ok", "message": "Recap AI API"}
+    return json.dumps({"status": "ok", "message": "Recap AI API"})
