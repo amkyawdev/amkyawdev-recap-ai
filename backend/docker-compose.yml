@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  # Redis for Celery
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - S3_ENDPOINT_URL=${S3_ENDPOINT_URL:-}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY:-}
+      - S3_SECRET_KEY=${S3_SECRET_KEY:-}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME:-recap-ai}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - DEBUG=false
+    volumes:
+      - ./app:/app/app
+      - uploads:/app/uploads
+      - outputs:/app/outputs
+      - /tmp/recap-ai:/tmp/recap-ai
+    depends_on:
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Celery Worker (GPU Queue)
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    command: celery -A app.core.redis worker --loglevel=info --concurrency=2 -Q gpu
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CUDA_VISIBLE_DEVICES=0
+    volumes:
+      - ./app:/app/app
+      - uploads:/app/uploads
+      - outputs:/app/outputs
+      - /tmp/recap-ai:/tmp/recap-ai
+    depends_on:
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Celery Worker (CPU Queue)
+  celery-worker-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    command: celery -A app.core.redis worker --loglevel=info --concurrency=4 -Q cpu
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CUDA_VISIBLE_DEVICES=-1
+    volumes:
+      - ./app:/app/app
+      - uploads:/app/uploads
+      - outputs:/app/outputs
+      - /tmp/recap-ai:/tmp/recap-ai
+    depends_on:
+      redis:
+        condition: service_healthy
+
+volumes:
+  redis_data:
+  uploads:
+  outputs:

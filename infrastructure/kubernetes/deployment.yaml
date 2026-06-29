@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recap-ai-backend
+  namespace: recap-ai
+  labels:
+    app: recap-ai-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: recap-ai-backend
+  template:
+    metadata:
+      labels:
+        app: recap-ai-backend
+    spec:
+      containers:
+      - name: backend
+        image: recapai/backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: OPENROUTER_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: recap-ai-secrets
+              key: openrouter-api-key
+        - name: REDIS_URL
+          value: "redis://redis-service:6379/0"
+        - name: S3_ENDPOINT_URL
+          valueFrom:
+            configMapKeyRef:
+              name: recap-ai-config
+              key: s3-endpoint
+        - name: S3_BUCKET_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: recap-ai-config
+              key: s3-bucket
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      nodeSelector:
+        workload: backend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: recap-ai
+spec:
+  selector:
+    app: recap-ai-backend
+  ports:
+  - port: 80
+    targetPort: 8000
+  type: ClusterIP
